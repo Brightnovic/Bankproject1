@@ -9,7 +9,7 @@ namespace SonayoBank
     internal class Consumer
     {
         // Properties representing consumer fields
-        public string Firstname { get; set; }
+        public string Firstname { get; set;  }
         public string Secondname { get; set; }
         public string Othernames { get; set; }
         public string PhoneNumber { get; set; }

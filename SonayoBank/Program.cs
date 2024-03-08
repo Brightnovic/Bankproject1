@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace SonayoBank
 {
@@ -11,54 +7,56 @@ namespace SonayoBank
     {
         static void Main(string[] args)
         {
-        Start:
+            Console.WriteLine("Welcome to SonayoBank. Thanks for choosing us. Please sign up.");
 
-            Console.WriteLine("Welcome to SonayoBank");
+            // Create a new Consumer object from user input
+            Consumer consumer = CreateFromUserInput();
 
-            Console.WriteLine("press 1 to create account:");
-            Console.WriteLine("press 2 to withdraw money");
-            Console.Write("press 3  to send money");
-            string reply = Console.ReadLine();
-        
-            if (reply == "1")
-            {
-                Consumer consumer = CreateFromUserInput();
-
-                Console.WriteLine("Customer details created successfully:");
-                Console.WriteLine("First name: " + consumer.Firstname);
-                Console.WriteLine("Second name: " + consumer.Secondname);
-                Console.WriteLine("Other names: " + consumer.Othernames);
-                Console.WriteLine("Phone number: " + consumer.PhoneNumber);
-                Console.WriteLine("Next of kin: " + consumer.Nextofkin);
-                Console.WriteLine("Address: " + consumer.Address);
-                Console.WriteLine("Date of birth: " + consumer.DateOfBirth.ToString("yyyy-MM-dd"));
-                Console.WriteLine("Gender: " + consumer.Gender);
-                Console.WriteLine("BVN: " + consumer.Bvn);
-                Console.WriteLine("Account number: " + consumer.AccountNumber);
-                Console.WriteLine("ATM PIN: " + consumer.AtmPin);
-                Console.WriteLine("Transfer PIN: " + consumer.TransferPin);
-                Console.WriteLine("NIN: " + consumer.Nin);
-                Console.WriteLine("Account balance: " + consumer.AccountBalance);
-
-            }
-            else if (reply == "2")
-            {
-                Withdraw();
-            }
-        
-            else if (reply == "3")
-            {
-                transfer();
-            }
-            else
-            {
-                Console.WriteLine("invalid input! please try again");
-                goto Start;
-            }
-
-            Console.ReadKey();
+            // Main menu
+            MainMenu(consumer);
         }
 
+        public static void MainMenu(Consumer consumer)
+        {
+        Start:
+            Console.WriteLine("Welcome to SonayoBank. Thanks for choosing us.");
+            Console.WriteLine("Press 0 to change transfer pin");
+            Console.WriteLine("Press 1 to withdraw money");
+            Console.WriteLine("Press 2 to check your account balance");
+            Console.WriteLine("Press 3 to send money");
+            Console.WriteLine("Press 4 to exit");
+            Console.WriteLine("Press 5 to deposit");
+
+            string reply = Console.ReadLine();
+
+            switch (reply)
+            {
+                case "0":
+                    ChangeTransferPin(consumer.AtmPin);
+                    break;
+                case "1":
+                    Withdraw(consumer.AtmPin, consumer.AtmPin);
+                    break;
+                case "2":
+                    CheckBalance(consumer.AccountBalance);
+                    break;
+                case "3":
+                    Transfer(consumer.AccountBalance);
+                    break;
+                case "4":
+                    deposit(consumer.AccountNumber, consumer.AccountBalance);
+                    break;
+                case "5":
+                    Environment.Exit(0);
+                    break;
+                default:
+                    Console.WriteLine("Invalid input! Please try again.");
+                    goto Start;
+            }
+
+            // Return to main menu after completing an action
+            MainMenu(consumer);
+        }
 
         public static Consumer CreateFromUserInput()
         {
@@ -153,35 +151,135 @@ namespace SonayoBank
             }
         }
 
-
-        public static void Withdraw()
+        public static void Banned()
         {
-            try
-            {
-                Console.Write("please enter your pin:");
+       
+            Console.WriteLine("your account had been supended");
+            Console.Beep();
+            Console.Beep();
+            Console.Beep();
+            Environment.Exit(0);
+
+        }
+
+        public static void Withdraw( int accountBalance, int Atmpin)
+        {
+            int attempt = 0;
+    
+
+        withdraw:
+                try
+                {
+                Console.Write("Please enter your pin:");
+                int atmpin = Convert.ToInt32(Console.ReadLine());
+                if (atmpin != Atmpin)
+                {
+                    Console.WriteLine("wrong pin please try again");
+                    attempt++;
+
+                    if (attempt <=2)
+                    {
+                        goto withdraw;
+                     
+                    }
+                    else
+                    {
+                        Banned();
+                    }
+
+                     
+                    
+                }
+                else
+                {
+
+                    Console.Write("please enter amout  to  withdraw");
+ 
+ 
+                    int amount = Convert.ToInt32(Console.ReadLine());
+                    if (amount > accountBalance)
+                    {
+                        Console.Write("your account balance is too low to make this transaction");
+                        goto withdraw;
+                    }
+                    else
+                    {
+                        accountBalance = accountBalance - amount;
+                        Console.WriteLine("you have successfully withdrawed");
+                        Console.Write(amount);
+                        Console.WriteLine("you have");
+                        Console.Write(accountBalance);
+                        Console.WriteLine("remaining");
+                    }
+                }
+            
 
 
+
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    goto withdraw;
+                }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine("");
-            }
+            
+        public static void CheckBalance(int accountBalance)
+        {
+            Console.WriteLine("Your balance is: " + accountBalance);
         }
 
 
 
-        public static void transfer(int accountBalance)
+        public static void deposit(int AccountNumber, int accountBalance)
         {
-     transferL:
+            depositL:
+            Console.Write("plese enter your account number:");
+         int  ActNum = Convert.ToInt32(Console.ReadLine());
+            if (ActNum != AccountNumber)
+            {
+                Console.WriteLine("this is not your account number please  try again");
+                goto depositL;
+            }
+            else
+            {
+                Console.WriteLine(" please enter amount you want to deposit");
+                int amount = Convert.ToInt32(Console.ReadLine());
+                accountBalance = accountBalance + amount;
+                Console.Write(" you have successfully deposited ");
+                Console.Write(amount);
+                Console.Write(" your total balance is:");
+                Console.WriteLine(accountBalance);
+
+            }
+
+        }
+
+        public static void Transfer(int accountBalance)
+        {
+        transferL:
             try
             {
                 Console.Write("please enter account number to transfer money to:");
-             string accountNum =  Console.ReadLine();
+                string accountNum = Console.ReadLine();
                 Console.Write("please enter amount to transfer:");
                 int amount = Convert.ToInt32(Console.ReadLine());
                 if (amount > accountBalance)
                 {
                     Console.Write("your account balance is too low to make this transaction");
+                    goto transferL;
+                }
+                else
+                {
+                    accountBalance = accountBalance - amount;
+                    Console.WriteLine("you have successfully transfered");
+                    Console.Write(amount);
+                    Console.Write("to");
+                    Console.Write(accountNum);
+                    Console.WriteLine("you have");
+                    Console.Write(accountBalance);
+                    Console.WriteLine("remaining");
                 }
 
 
@@ -195,26 +293,34 @@ namespace SonayoBank
                 Console.WriteLine(e);
                 goto transferL;
             }
+
         }
 
-
-
-        public static void changetransferpin()
+        public static void ChangeTransferPin(int AtmPin)
         {
             try
             {
-                Console.Write("please enter old pin:");
-
-                Console.Write("please enter new pin:");
-                Console.Write("please confirm the pin:");
+                Console.Write("Please enter old pin:");
+                int oldpin = Convert.ToInt32(Console.ReadLine());
+                if (oldpin != AtmPin)
+                {
+                    Console.WriteLine("Wrong ATM pin!");
+                    ChangeTransferPin(AtmPin); // Retry
+                }
+                else
+                {
+                    Console.Write("Please enter new pin:");
+                    int newPin = Convert.ToInt32(Console.ReadLine());
+                    Console.Write("Please confirm the pin:");
+                    int confirmPin = Convert.ToInt32(Console.ReadLine());
+                    // Check and update pin...
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine("");
+                Console.WriteLine("Error: " + e.Message);
+                ChangeTransferPin(AtmPin); // Retry
             }
         }
     }
-
-
-
 }
